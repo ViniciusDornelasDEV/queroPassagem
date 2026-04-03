@@ -42,4 +42,8 @@ return [
         'affiliate' => env('QUEROPASSAGEM_AFFILIATE'),
     ],
 
+    'api' => [
+        'key' => env('API_KEY'),
+    ],
+
 ];

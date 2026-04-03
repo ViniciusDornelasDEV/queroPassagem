@@ -2,7 +2,6 @@
 
 namespace App\Exceptions;
 
-use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -32,14 +32,14 @@ class Handler extends ExceptionHandler
             ], $e->status);
         });
 
-        $this->renderable(function (AuthenticationException $e, Request $request) {
+        $this->renderable(function (UnauthorizedHttpException $e, Request $request) {
             if (! $request->expectsJson() && ! $request->is('api/*')) {
                 return null;
             }
             return new JsonResponse([
                 'success' => false,
                 'error' => [
-                    'type' => 'authentication_error',
+                    'type' => 'authorization_error',
                     'message' => $e->getMessage() ?: 'Unauthenticated.',
                 ],
             ], 401);

@@ -16,7 +16,13 @@ class SeatApiTest extends TestCase
             'services.queropassagem.user' => 'test-user',
             'services.queropassagem.password' => 'test-pass',
             'services.queropassagem.affiliate' => null,
+            'services.api.key' => 'test-api-key',
         ]);
+    }
+
+    private function apiHeaders(): array
+    {
+        return ['X-API-KEY' => 'test-api-key'];
     }
 
     public function test_post_seats_returns_successful_standardized_payload(): void
@@ -42,7 +48,7 @@ class SeatApiTest extends TestCase
             'travelId' => '123',
             'orientation' => 'horizontal',
             'type' => 'matrix',
-        ]);
+        ], $this->apiHeaders());
 
         $response->assertStatus(200);
         $response->assertJson([
@@ -75,11 +81,33 @@ class SeatApiTest extends TestCase
     {
         Http::fake();
 
-        $response = $this->postJson('/api/v1/seats', []);
+        $response = $this->postJson('/api/v1/seats', [], $this->apiHeaders());
 
         $response->assertStatus(422);
         $response->assertJson([
             'success' => false,
+        ]);
+
+        Http::assertNothingSent();
+    }
+
+    public function test_post_seats_without_api_key_returns_unauthorized(): void
+    {
+        Http::fake();
+
+        $response = $this->postJson('/api/v1/seats', [
+            'travelId' => '123',
+            'orientation' => 'horizontal',
+            'type' => 'matrix',
+        ]);
+
+        $response->assertStatus(401);
+        $response->assertJson([
+            'success' => false,
+            'error' => [
+                'type' => 'authorization_error',
+                'message' => 'Invalid API Key',
+            ],
         ]);
 
         Http::assertNothingSent();
