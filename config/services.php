@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'queropassagem' => [
+        'base_url' => env('QUEROPASSAGEM_BASE_URL'),
+        'user' => env('QUEROPASSAGEM_USER'),
+        'password' => env('QUEROPASSAGEM_PASSWORD'),
+        'affiliate' => env('QUEROPASSAGEM_AFFILIATE'),
+    ],
+
 ];
