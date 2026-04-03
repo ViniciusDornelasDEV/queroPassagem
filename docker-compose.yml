@@ -13,7 +13,6 @@ services:
     volumes:
       - ./:/var/www
     depends_on:
-      - mysql
       - redis
 
   nginx:
@@ -27,31 +26,8 @@ services:
     depends_on:
       - app
 
-  mysql:
-    image: mysql:8.0
-    container_name: laravel_mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: queropassagem
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   redis:
     image: redis:alpine
     container_name: laravel_redis
     ports:
       - "6379:6379"
-
-  mailpit:
-    image: axllent/mailpit
-    container_name: laravel_mailpit
-    ports:
-      - "8025:8025"
-      - "1025:1025"
-
-volumes:
-  mysql_data:
-    name: laravel_mysql_data
