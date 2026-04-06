@@ -42,6 +42,19 @@ class TripResource extends JsonResource
             ],
             'availableSeats' => data_get($this->resource, 'availableSeats'),
             'seatClass' => data_get($this->resource, 'seatClass'),
+            'travelDuration' => $this->formatDuration(data_get($this->resource, 'travelDuration')),
         ];
+    }
+
+    private function formatDuration(?int $seconds): ?string
+{
+    if (! $seconds || $seconds <= 0) {
+        return null;
+    }
+        $minutes = intdiv($seconds, 60);
+        $hours = intdiv($minutes, 60);
+        $remainingMinutes = $minutes % 60;
+
+        return "{$hours}h {$remainingMinutes}min";
     }
 }
