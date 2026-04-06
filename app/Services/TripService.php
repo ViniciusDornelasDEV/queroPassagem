@@ -71,7 +71,6 @@ class TripService
 
     private function loadCompaniesForTrips(Collection $trips): Collection
     {
-        $company = $this->companyService->getCompany(2);
         return $trips
             ->pluck('company.id')
             ->filter()
