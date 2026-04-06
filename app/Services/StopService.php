@@ -21,11 +21,11 @@ class StopService
 
     public function validateStop(string $id): array
     {
-        foreach ($this->getStops() as $stop) {        
+        foreach ($this->getStops() as $stop) {
             if ((string) ($stop['id'] ?? '') === $id) {
                 return $stop;
-            }        
-            if (!empty($stop['substops']) && is_array($stop['substops'])) {
+            }
+            if (! empty($stop['substops']) && is_array($stop['substops'])) {
                 foreach ($stop['substops'] as $sub) {
                     if ((string) ($sub['id'] ?? '') === $id) {
                         return $sub;
@@ -33,11 +33,11 @@ class StopService
                 }
             }
         }
-    
+
         throw ValidationException::withMessages([
             'stop' => 'Rodoviária não encontrada.',
         ]);
-    
+
     }
 
     public function expandStopIds(string $id): array
@@ -78,6 +78,8 @@ class StopService
 
     private function normalizeStops(array $payload): array
     {
+        $allowedStates = config('queropassagem.allowed_states', []);
+
         $stops = $payload;
 
         if (isset($payload['stops']) && is_array($payload['stops'])) {
@@ -90,13 +92,13 @@ class StopService
             if (! is_array($item)) {
                 continue;
             }
-            $normalized[] = $this->normalizeStop($item);
+            $normalized[] = $this->normalizeStop($item, $allowedStates);
         }
 
         return $normalized;
     }
 
-    private function normalizeStop(array $item): array
+    private function normalizeStop(array $item, array $allowedStates): array
     {
         $rawSubstops = $item['substops'] ?? [];
         if (! is_array($rawSubstops)) {
@@ -109,25 +111,44 @@ class StopService
             if (! is_array($sub)) {
                 continue;
             }
-            $substops[] = $this->normalizeSubstop($sub);
+            $substops[] = $this->normalizeSubstop($sub, $allowedStates);
         }
+
+        $name = (string) ($item['name'] ?? '');
+        $state = $this->extractState($name);
 
         return [
             'id' => (string) ($item['id'] ?? ''),
-            'name' => (string) ($item['name'] ?? ''),
+            'name' => $name,
             'url' => (string) ($item['url'] ?? ''),
             'type' => (string) ($item['type'] ?? ''),
+            'state' => $state,
+            'allowed' => $state !== null && in_array($state, $allowedStates, true),
             'substops' => $substops,
         ];
     }
 
-    private function normalizeSubstop(array $sub): array
+    private function normalizeSubstop(array $sub, array $allowedStates): array
     {
+        $name = (string) ($sub['name'] ?? '');
+        $state = $this->extractState($name);
+
         return [
             'id' => (string) ($sub['id'] ?? ''),
-            'name' => (string) ($sub['name'] ?? ''),
+            'name' => $name,
             'url' => (string) ($sub['url'] ?? ''),
             'type' => (string) ($sub['type'] ?? 'station'),
+            'state' => $state,
+            'allowed' => $state !== null && in_array($state, $allowedStates, true),
         ];
+    }
+
+    private function extractState(string $name): ?string
+    {
+        if (preg_match('/,\s([A-Z]{2})\b/', $name, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

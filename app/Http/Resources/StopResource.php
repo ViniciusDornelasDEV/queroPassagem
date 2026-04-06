@@ -16,6 +16,8 @@ class StopResource extends JsonResource
             'name' => data_get($this->resource, 'name'),
             'url' => data_get($this->resource, 'url'),
             'type' => data_get($this->resource, 'type'),
+            'state' => data_get($this->resource, 'state'),
+            'allowed' => (bool) data_get($this->resource, 'allowed', false),
             'substops' => StopResource::collection(
                 is_array($substops) ? $substops : [],
             ),

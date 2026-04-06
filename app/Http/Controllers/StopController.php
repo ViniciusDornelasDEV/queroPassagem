@@ -11,13 +11,16 @@ class StopController extends Controller
 {
     public function __construct(
         private readonly StopService $stopService,
-    ) {
-    }
+    ) {}
 
     public function index(): JsonResponse
     {
         $stops = $this->stopService->getStops();
 
-        return ApiResponse::success(StopResource::collection($stops));
+        return ApiResponse::success(
+            StopResource::collection($stops),
+            200,
+            ['allowedStates' => config('queropassagem.allowed_states', [])],
+        );
     }
 }
